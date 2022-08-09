@@ -1,0 +1,19 @@
+{
+    "name": "kaivladimirv/app",
+    "type": "project",
+    "authors": [
+        {
+            "name": "kaivladimirv",
+            "email": "kaivladimirv@gmail.com"
+        }
+    ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src"
+    }
+  },
+  "description": ""
+}

@@ -1,0 +1,56 @@
+{
+  "pools": {
+    "pool00": {
+      "servers": [
+        "memcached1:11211",
+        "memcached2:11211",
+        "memcached3:11211"
+      ]
+    },
+    "pool01": {
+      "servers": [
+        "memcached2:11211",
+        "memcached3:11211",
+        "memcached1:11211"
+      ]
+    },
+    "pool02": {
+      "servers": [
+        "memcached3:11211",
+        "memcached1:11211",
+        "memcached2:11211"
+      ]
+    }
+  },
+  "route": {
+    "type": "OperationSelectorRoute",
+    "operation_policies": {
+      "delete": "AllMajorityRoute|Pool|pool00",
+      "get": {
+        "type": "RandomRoute",
+        "children": [
+          "MissFailoverRoute|Pool|pool02",
+          "MissFailoverRoute|Pool|pool00",
+          "MissFailoverRoute|Pool|pool01"
+        ]
+      },
+      "gets": "MissFailoverRoute|Pool|pool00",
+      "set": {
+        "type": "RandomRoute",
+        "children": [
+          "FailoverRoute|Pool|pool02",
+          "FailoverRoute|Pool|pool00",
+          "FailoverRoute|Pool|pool01"
+        ]
+      },
+      "add": {
+        "type": "RandomRoute",
+        "children": [
+          "FailoverRoute|Pool|pool02",
+          "FailoverRoute|Pool|pool00",
+          "FailoverRoute|Pool|pool01"
+        ]
+      }
+    }
+  }
+}

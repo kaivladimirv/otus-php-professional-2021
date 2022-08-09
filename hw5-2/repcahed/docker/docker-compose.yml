@@ -1,0 +1,111 @@
+version: '3'
+services:
+    mysite-nginx-load-balancer:
+        build:
+            context: nginx-load-balancer
+            dockerfile: Dockerfile
+        image: otus/mysite-nginx-load-balancer
+        container_name: mysite-nginx-load-balancer
+        volumes:
+            - ../app:/app:delegated
+            - ../sock:/sock
+        depends_on:
+            - mysite-nginx-1
+            - mysite-nginx-2
+        ports:
+            - "80:80"
+        networks:
+            - mysite-network
+
+    mysite-nginx-1:
+        build:
+            context: nginx-1
+            dockerfile: Dockerfile
+        image: otus/mysite-nginx-1
+        container_name: mysite-nginx-1
+        volumes:
+            - ../app:/app:delegated
+            - ../sock:/sock
+        depends_on:
+            - mysite-php-fpm-1
+            - mysite-php-fpm-2
+        networks:
+            - mysite-network
+
+    mysite-nginx-2:
+        build:
+            context: nginx-2
+            dockerfile: Dockerfile
+        image: otus/mysite-nginx-2
+        container_name: mysite-nginx-2
+        volumes:
+            - ../app:/app:delegated
+            - ../sock:/sock
+        depends_on:
+            - mysite-php-fpm-1
+            - mysite-php-fpm-2
+        networks:
+            - mysite-network
+
+    mysite-php-fpm-1:
+        build:
+            context: php-fpm-1
+            dockerfile: Dockerfile
+        image: otus/mysite-php-fpm-1
+        container_name: mysite-php-fpm-1
+        volumes:
+            - ../app:/app:delegated
+            - ../sock:/sock
+        depends_on:
+            - mysite-memcached-1
+            - mysite-memcached-2
+        networks:
+            - mysite-network
+
+    mysite-php-fpm-2:
+        build:
+            context: php-fpm-2
+            dockerfile: Dockerfile
+        image: otus/mysite-php-fpm-2
+        container_name: mysite-php-fpm-2
+        volumes:
+            - ../app:/app:delegated
+            - ../sock:/sock
+        depends_on:
+            - mysite-memcached-1
+            - mysite-memcached-2
+        networks:
+            - mysite-network
+
+    mysite-memcached-1:
+        image: oktec/repcached
+        container_name: mysite-memcached-1
+        environment:
+            SLAVE: "mysite-memcached-2"
+        ports:
+            - "11212:11211"
+        networks:
+            - mysite-network
+
+    mysite-memcached-2:
+        image: oktec/repcached
+        container_name: mysite-memcached-2
+        environment:
+            SLAVE: "mysite-memcached-1"
+        ports:
+            - "11213:11211"
+        networks:
+            - mysite-network
+
+    php-cli:
+        build:
+            context: php-cli
+            dockerfile: Dockerfile
+        image: otus/php-cli
+        container_name: otus-php-cli
+        volumes:
+            - ../app:/app:delegated
+
+networks:
+    mysite-network:
+        driver: bridge
